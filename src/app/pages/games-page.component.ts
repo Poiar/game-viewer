@@ -6,6 +6,7 @@ import { GamesService } from "../services/games.service";
 import { LookupService } from "../services/lookup.service";
 import { AuthService } from "../services/auth.service";
 import { MasterGame, Genre } from "../types/game.types";
+import { coverGradient } from "../shared/cover-placeholder";
 
 @Component({
   selector: "app-games-page",
@@ -169,9 +170,9 @@ import { MasterGame, Genre } from "../types/game.types";
                   height="422"
                 />
               } @else {
-                <div class="card-cover card-cover--placeholder">
-                  <span class="placeholder-icon">🎮</span>
+                <div class="card-cover card-cover--placeholder" [style.background]="coverGradient(game.title)">
                   <span class="placeholder-title">{{ game.title }}</span>
+                  <span class="placeholder-year">{{ game.firstReleaseYear }}</span>
                 </div>
               }
 
@@ -721,24 +722,30 @@ import { MasterGame, Genre } from "../types/game.types";
       }
 
       .card-cover--placeholder {
-        background: linear-gradient(145deg, var(--bg-tertiary) 0%, var(--bg-elevated) 100%);
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 8px;
+        gap: 6px;
         padding: 16px;
-      }
-      .placeholder-icon {
-        font-size: 40px;
-        opacity: 0.4;
+        text-align: center;
       }
       .placeholder-title {
-        font-size: 12px;
+        font-size: 13px;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.95);
+        line-height: 1.25;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .placeholder-year {
+        font-size: 11px;
         font-weight: 600;
-        color: var(--text-muted);
-        text-align: center;
-        line-height: 1.3;
+        color: rgba(255, 255, 255, 0.72);
+        letter-spacing: 0.04em;
       }
 
       /* Owned count badge */
@@ -1103,6 +1110,7 @@ export class GamesPageComponent implements OnInit {
   private lookupService = inject(LookupService);
   private auth = inject(AuthService);
   private route = inject(ActivatedRoute);
+  protected readonly coverGradient = coverGradient;
 
   games = signal<MasterGame[]>([]);
   genres = signal<Genre[]>([]);

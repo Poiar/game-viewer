@@ -1,7 +1,7 @@
 {
-  "name": "gameviewer-server",
+  "name": "game-viewer-server",
   "version": "1.0.0",
-  "description": "GameViewer backend API - Discogs for video games",
+  "description": "game-viewer backend API - Discogs for video games",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,6 +12,7 @@
     "db:generate": "drizzle-kit generate",
     "db:seed": "tsx src/db/seed.ts",
     "db:import-sheet": "tsx src/db/import-sheet.ts",
+    "db:upgrade-covers": "tsx src/db/upgrade-covers.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },

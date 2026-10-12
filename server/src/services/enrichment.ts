@@ -39,11 +39,23 @@ async function igdbQuery<T>(endpoint: string, body: string): Promise<T | null> {
   return (await res.json()) as T;
 }
 
+// IGDB cover size tokens, ascending resolution. We always upgrade to the
+// highest-res cover variant: t_cover_big_2x is 2× t_cover_big (528×748 vs 264×374).
+const IGDB_COVER_UPGRADES: Array<[string, string]> = [
+  ["t_thumb", "t_cover_big_2x"],
+  ["t_cover_small", "t_cover_big_2x"],
+  ["t_cover_big", "t_cover_big_2x"],
+];
+
 export function getIgdbCoverUrl(coverUrl: string | undefined): string | undefined {
   if (!coverUrl) return undefined;
-  // IGDB cover URLs: //images.igdb.com/igdb/image/upload/t_thumb/co2r2r.jpg
-  // Replace t_thumb with t_cover_big for high-res
-  return coverUrl.startsWith("//") ? "https:" + coverUrl.replace("t_thumb", "t_cover_big") : coverUrl;
+  let url = coverUrl.startsWith("//") ? "https:" + coverUrl : coverUrl;
+  // Size tokens sit between slashes (/upload/<size>/<id>.jpg); match the slashes
+  // so the t_cover_big rule never clobbers a t_cover_big_2x we just wrote.
+  for (const [from, to] of IGDB_COVER_UPGRADES) {
+    url = url.replace(`/${from}/`, `/${to}/`);
+  }
+  return url;
 }
 
 export async function searchIgdb(title: string): Promise<IgdbGame | null> {

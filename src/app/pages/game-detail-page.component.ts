@@ -4,6 +4,7 @@ import { HttpClient } from "@angular/common/http";
 import { GamesService } from "../services/games.service";
 import { FavoritesService } from "../services/favorites.service";
 import { MasterGameDetail } from "../types/game.types";
+import { coverGradient } from "../shared/cover-placeholder";
 
 @Component({
   selector: "app-game-detail-page",
@@ -28,7 +29,10 @@ import { MasterGameDetail } from "../types/game.types";
           @if (g.coverImageUrl) {
             <img [src]="g.coverImageUrl" [alt]="g.title" />
           } @else {
-            <div class="cover-placeholder">🎮</div>
+            <div class="cover-placeholder" [style.background]="coverGradient(g.title)">
+              <span class="ph-title">{{ g.title }}</span>
+              <span class="ph-year">{{ g.firstReleaseYear }}</span>
+            </div>
           }
         </div>
         <div class="detail-meta">
@@ -461,12 +465,31 @@ import { MasterGameDetail } from "../types/game.types";
       }
       .cover-placeholder {
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
+        gap: 6px;
         width: 100%;
         height: 100%;
-        font-size: 64px;
-        opacity: 0.3;
+        padding: 16px;
+        text-align: center;
+      }
+      .cover-placeholder .ph-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.95);
+        line-height: 1.25;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+        display: -webkit-box;
+        -webkit-line-clamp: 5;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .cover-placeholder .ph-year {
+        font-size: 12px;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.75);
+        letter-spacing: 0.04em;
       }
 
       .detail-title-row {
@@ -1092,6 +1115,7 @@ export class GameDetailPageComponent implements OnInit {
   private gamesService = inject(GamesService);
   private fs = inject(FavoritesService);
   private http = inject(HttpClient);
+  protected readonly coverGradient = coverGradient;
 
   game = signal<MasterGameDetail | null>(null);
   loading = signal(true);

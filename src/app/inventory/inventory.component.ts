@@ -5,6 +5,7 @@ import { InventoryService } from "../services/inventory.service";
 import { ReleasesService } from "../services/releases.service";
 import { OwnedInstance, Release } from "../types/game.types";
 import { SlicePipe } from "@angular/common";
+import { coverGradient } from "../shared/cover-placeholder";
 
 @Component({
   selector: "app-inventory",
@@ -18,6 +19,7 @@ export class InventoryComponent implements OnInit {
   protected readonly authService = inject(AuthService);
   private readonly inventoryService = inject(InventoryService);
   private readonly releasesService = inject(ReleasesService);
+  protected readonly coverGradient = coverGradient;
 
   ownedInstances = signal<OwnedInstance[]>([]);
   releases = signal<Release[]>([]);

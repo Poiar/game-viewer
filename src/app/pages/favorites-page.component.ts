@@ -3,6 +3,7 @@ import { RouterLink } from "@angular/router";
 import { HttpClient } from "@angular/common/http";
 import { FavoritesService } from "../services/favorites.service";
 import { AuthService } from "../services/auth.service";
+import { coverGradient } from "../shared/cover-placeholder";
 
 interface FavoriteGame {
   id: number;
@@ -49,8 +50,8 @@ interface FavoriteGame {
               @if (game.coverImageUrl) {
                 <img class="card-img" [src]="game.coverImageUrl" [alt]="game.title" loading="lazy" />
               } @else {
-                <div class="card-img card-img--ph">
-                  <span class="ph-icon">🎮</span>
+                <div class="card-img card-img--ph" [style.background]="coverGradient(game.title)">
+                  <span class="ph-title">{{ game.title }}</span>
                 </div>
               }
               <button class="rm-btn" (click)="remove(game.id, $event)" title="Remove">✕</button>
@@ -153,14 +154,22 @@ interface FavoriteGame {
         transform: scale(1.06);
       }
       .card-img--ph {
-        background: linear-gradient(145deg, var(--bg-tertiary), var(--bg-elevated));
         display: flex;
         align-items: center;
         justify-content: center;
+        padding: 12px;
+        text-align: center;
       }
-      .ph-icon {
-        font-size: 36px;
-        opacity: 0.3;
+      .ph-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.95);
+        line-height: 1.25;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+        display: -webkit-box;
+        -webkit-line-clamp: 5;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
       }
       .rm-btn {
         position: absolute;
@@ -341,6 +350,7 @@ export class FavoritesPageComponent implements OnInit {
   private http = inject(HttpClient);
   private fs = inject(FavoritesService);
   private auth = inject(AuthService);
+  protected readonly coverGradient = coverGradient;
 
   favorites = signal<FavoriteGame[]>([]);
   loading = signal(true);

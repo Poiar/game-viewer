@@ -127,7 +127,7 @@
                 @if (owned.release?.releaseGroup?.masterGame?.coverImageUrl) {
                   <img [src]="owned.release?.releaseGroup?.masterGame?.coverImageUrl" alt="" loading="lazy" />
                 } @else {
-                  <span class="ir-cover-ph">🎮</span>
+                  <span class="ir-cover-ph" [style.background]="coverGradient(owned.id)">🎮</span>
                 }
               </div>
               <div class="ir-info">

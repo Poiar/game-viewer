@@ -7,11 +7,19 @@ import { describe, it, expect } from "vitest";
 /**
  * Transforms IGDB cover URLs from thumbnail to high-res.
  * IGDB returns //images.igdb.com/igdb/image/upload/t_thumb/co2r2r.jpg
- * We replace t_thumb with t_cover_big and prefix https:
+ * We upgrade the size token to t_cover_big_2x and prefix https:
  */
 export function getIgdbCoverUrl(coverUrl: string | undefined): string | undefined {
   if (!coverUrl) return undefined;
-  return coverUrl.startsWith("//") ? "https:" + coverUrl.replace("t_thumb", "t_cover_big") : coverUrl;
+  let url = coverUrl.startsWith("//") ? "https:" + coverUrl : coverUrl;
+  for (const [from, to] of [
+    ["t_thumb", "t_cover_big_2x"],
+    ["t_cover_small", "t_cover_big_2x"],
+    ["t_cover_big", "t_cover_big_2x"],
+  ] as const) {
+    url = url.replace(`/${from}/`, `/${to}/`);
+  }
+  return url;
 }
 
 /**
@@ -41,9 +49,9 @@ describe("getIgdbCoverUrl", () => {
     expect(getIgdbCoverUrl(undefined)).toBeUndefined();
   });
 
-  it("transforms t_thumb to t_cover_big and adds https:", () => {
+  it("transforms t_thumb to t_cover_big_2x and adds https:", () => {
     const input = "//images.igdb.com/igdb/image/upload/t_thumb/co2r2r.jpg";
-    const expected = "https://images.igdb.com/igdb/image/upload/t_cover_big/co2r2r.jpg";
+    const expected = "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co2r2r.jpg";
     expect(getIgdbCoverUrl(input)).toBe(expected);
   });
 
@@ -53,18 +61,28 @@ describe("getIgdbCoverUrl", () => {
     expect(getIgdbCoverUrl(input)).toBe(expected);
   });
 
-  it("returns https: URLs as-is (only transforms // prefixed URLs)", () => {
+  it("upgrades https: URLs too", () => {
     const input = "https://images.igdb.com/igdb/image/upload/t_thumb/abc.jpg";
-    // The function only touches URLs starting with // — https: URLs are returned unchanged
-    expect(getIgdbCoverUrl(input)).toBe(input);
+    const expected = "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/abc.jpg";
+    expect(getIgdbCoverUrl(input)).toBe(expected);
   });
 
-  it("replaces first occurrence of t_thumb in // URLs", () => {
+  it("replaces t_thumb with t_cover_big_2x in // URLs", () => {
     const input = "//images.igdb.com/igdb/image/upload/t_thumb/co2r2r.jpg";
     const result = getIgdbCoverUrl(input);
     expect(result).not.toContain("t_thumb");
-    expect(result).toContain("t_cover_big");
-    expect(result).toBe("https://images.igdb.com/igdb/image/upload/t_cover_big/co2r2r.jpg");
+    expect(result).toContain("t_cover_big_2x");
+    expect(result).toBe("https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co2r2r.jpg");
+  });
+
+  it("upgrades an existing t_cover_big URL to t_cover_big_2x", () => {
+    const input = "//images.igdb.com/igdb/image/upload/t_cover_big/co123.jpg";
+    expect(getIgdbCoverUrl(input)).toBe("https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co123.jpg");
+  });
+
+  it("leaves t_cover_big_2x URLs unchanged", () => {
+    const input = "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co123.jpg";
+    expect(getIgdbCoverUrl(input)).toBe(input);
   });
 });
 
