@@ -253,7 +253,7 @@ describe("README Builder", () => {
     it("contains required sections", () => {
       const content = fs.readFileSync(readmePath, "utf-8");
       const sections = [
-        "# GameViewer",
+        "# game-viewer",
         "## Quick Start",
         "## Project Structure",
         "## Architecture",

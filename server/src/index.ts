@@ -66,8 +66,8 @@ app.use(errorHandler);
 // Start server
 // ---------------------------------------------------------------------------
 app.listen(config.port, () => {
-  console.log(`[GameViewer API] Server running on http://localhost:${config.port}`);
-  console.log(`[GameViewer API] Environment: ${process.env.NODE_ENV ?? "development"}`);
+  console.log(`[game-viewer API] Server running on http://localhost:${config.port}`);
+  console.log(`[game-viewer API] Environment: ${process.env.NODE_ENV ?? "development"}`);
 });
 
 export default app;
