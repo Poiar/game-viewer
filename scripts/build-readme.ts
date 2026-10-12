@@ -422,7 +422,7 @@ function build(): string {
   const rootPkg = readJson("package.json");
   const serverPkg = readJson("server/package.json");
   const repoUrl = tryGitRemote();
-  const repoName = repoUrl ? repoUrl.split("/").pop()?.replace(".git", "") : "GameViewer";
+  const repoName = repoUrl ? repoUrl.split("/").pop()?.replace(".git", "") : "game-viewer";
 
   // =========================================================================
   // Header
@@ -444,7 +444,7 @@ function build(): string {
   w("## Quick Start");
   w();
   w("```bash");
-  w("git clone " + (repoUrl || "https://github.com/Poiar/GameViewer.git"));
+  w("git clone " + (repoUrl || "https://github.com/Poiar/game-viewer.git"));
   w(`cd ${repoName}`);
   w("npm install");
   w("# Backend setup");
@@ -465,7 +465,7 @@ function build(): string {
   w("## Project Structure");
   w();
   w("```");
-  w("GameViewer/");
+  w("game-viewer/");
   w("├── src/app/                  # Angular 21 frontend");
   w("│   ├── auth/                 # Login/register component");
   w("│   ├── dashboard/            # Stats dashboard");

@@ -1,7 +1,7 @@
-# Gitleaks configuration for GameViewer
+# Gitleaks configuration for game-viewer
 # https://github.com/gitleaks/gitleaks
 
-title = "GameViewer Gitleaks config"
+title = "game-viewer Gitleaks config"
 
 [allowlist]
   description = "Allowlisted patterns"
