@@ -2,68 +2,57 @@
 
 ## Quick reference
 
-| Command                        | Description                                                                                                                                 |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ng serve`                     | Dev server at `http://localhost:4200/` — **always use the "ng: serve" run configuration in WebStorm instead of running this in a terminal** |
-| `ng build`                     | Production build to `dist/game-viewer/`                                                                                                     |
-| `npm test`                     | Playwright tests with UI mode                                                                                                               |
-| `npm run test:headless`        | Playwright tests headless                                                                                                                   |
-| `npx playwright test --headed` | Playwright tests in headed browser                                                                                                          |
-| `ng generate component <name>` | Scaffold a new component                                                                                                                    |
-| `npm run lint`                 | Lint TypeScript + HTML (ESLint + Prettier)                                                                                                  |
-| `npm run lint:fix`             | Lint and auto-fix issues                                                                                                                    |
-| `npm run format`               | Format source files with Prettier                                                                                                           |
-| `npm run format:check`         | Check formatting without fixing                                                                                                             |
-| `npm run typecheck`            | TypeScript type check (tsc --noEmit)                                                                                                        |
-| `npm run prepare`              | Install Husky git hooks                                                                                                                     |
+Frontend (repo root):
+
+| Command                                   | Description                                                                                                                       |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `npm start` (or `ng serve`)               | Dev server at `http://localhost:4200/` — **prefer the "ng: serve" run configuration in WebStorm over running this in a terminal** |
+| `npm run build`                           | Production build to `dist/game-viewer/`                                                                                           |
+| `npm test`                                | Playwright E2E tests (UI mode)                                                                                                    |
+| `npm run test:headless`                   | Playwright E2E tests (headless)                                                                                                   |
+| `npm run test:unit`                       | Vitest unit tests                                                                                                                 |
+| `npm run lint`                            | ESLint (TS/HTML) + Stylelint (CSS)                                                                                                |
+| `npm run lint:fix`                        | Lint and auto-fix                                                                                                                 |
+| `npm run format` / `npm run format:check` | Prettier write / check                                                                                                            |
+| `npm run typecheck`                       | `tsc --noEmit`                                                                                                                    |
+| `npm run build-readme`                    | Regenerate `README.md` — **run this, never hand-edit README.md**                                                                  |
+| `npm run prepare`                         | Install Husky git hooks                                                                                                           |
+
+Backend (`cd server`):
+
+| Command                   | Description                            |
+| ------------------------- | -------------------------------------- |
+| `npm run dev`             | Express API on `:3001` (tsx watch)     |
+| `npm run db:push`         | Push Drizzle schema to Postgres        |
+| `npm run db:generate`     | Generate a Drizzle migration           |
+| `npm run db:import-sheet` | Import catalog data from Google Sheets |
+| `npm run db:seed`         | Seed demo data                         |
+| `npm run test`            | Vitest unit tests                      |
 
 ## Architecture
 
-- **Angular v21**, standalone components, **no routing** — single-page app.
-- Strict TypeScript: `strict`, `noImplicitOverride`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, strict template checking all enabled.
-- Four components: `AppComponent` (root), `GameUIComponent` (details panel), `InventoryComponent`, `AuthComponent`.
+- **Angular v21** (`^21.2.14`) routed SPA — Angular Router with **16 lazy-loaded page routes** defined in `src/app/routes.ts` (`dashboard`, `games`, `games/:slug`, `series`, `series/:slug`, `collections`, `collections/:id`, `inventory`, `versions`, `favorites`, `dlc`, `dlc/:id`, `platforms`, `providers`, `stats`, `timeline`); the empty path redirects to `dashboard`.
+- **Frontend layout** (`src/app/`): `pages/` (16 lazy route components), `services/` (16 services — 12 HTTP-backed + 4 auth/UI-state), `shared/` (empty-state, error-console, error-state, global-search, loading-spinner), plus `auth/`, `dashboard/`, `game-ui/`, `inventory/`, `model-viewer/` (Three.js), `profile/`, `types/`, `interceptors/`.
+- **Backend** (`server/`): Express + **Drizzle ORM** over **PostgreSQL** (Docker container `game-catalog-db`, port 5432, db `gamedb`). 21 tables in `server/src/db/schema.ts` (`master_games`, `release_groups`, `releases`, `dlcs`, `dlc_releases`, `dlc_release_compatibility`, `collections`, `collection_releases`, `collection_dlc_releases`, `users`, `refresh_tokens`, `user_favorites`, `owned_instances`, `user_game_photos`, and lookup tables `platforms`/`providers`/`genres`/`edition_types`/`media_formats`/`series`). Routes in `server/src/routes/` (auth, games, series, collections, dlc, inventory, dashboard, favorites, releases, lookup); auth = JWT + refresh tokens (`server/src/middleware/auth.ts`).
+- **Strict TypeScript** — `strict`, `noImplicitOverride`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, strict template checking.
 
-## Data model (`src/classes/`)
+## Legacy hardcoded model (`src/classes/`) — being phased out
 
-All game data is hardcoded as TypeScript module constants. The class hierarchy:
+An older in-memory data model still lives in `src/classes/` (`model.ts` + `*Data.ts`: `Content → Game → SuperVersion → GameVersion`, `Dlc → DlcVersion`, `Series`, `Collection`). It is **partially wired in** — `game-ui.component.ts` still imports from it. The app has migrated to the Postgres backend + HTTP services; treat `src/classes/` as legacy and prefer the backend for new data.
 
-```
-Content (abstract: id, title, firstRelease)
-├── Game → SuperVersion → GameVersion
-├── Dlc → DlcVersion
-├── Series (groups Games)
-└── Collection (groups GameVersions + DlcVersions)
-```
+If you must touch `src/classes/`: every class constructor **self-registers** the instance into a module-level array (`allGames`, `allSeries`, `allSuperVersions`, `allGameVersions`, `allDlcs`, `allDlcVersions`, `allCollections`) as a side effect — importing a module from `src/classes/` triggers all its top-level `new X(...)` calls. Classes/enums live in `model.ts`; data instances are split across `seriesData.ts`, `gameData.ts`, `superVersionData.ts`, `gameVersionData.ts`, `dlcData.ts`, `dlcVersionData.ts`, `collectionData.ts`. Key enums: `genreEnum`, `versionEnum`, `systemEnum`, `providerEnum`, `unsureBoolEnum`, `dlcTypeEnum`, `mediaEnum`.
 
-Key enums: `genreEnum`, `versionEnum`, `systemEnum`, `providerEnum`, `unsureBoolEnum`, `dlcTypeEnum`, `mediaEnum`.
+## Data model (backend)
 
-**Critical convention**: every class constructor self-registers the instance into a module-level array (`allGames`, `allSeries`, `allSuperVersions`, `allGameVersions`, `allDlcs`, `allDlcVersions`, `allCollections`). Importing a module from `src/classes/` triggers all its top-level `new X(...)` calls, populating these arrays as a side effect. AppComponent binds directly to these arrays.
-
-Classes and enums live in `src/classes/model.ts`. Data instances are split across `seriesData.ts`, `gameData.ts`, `superVersionData.ts`, `gameVersionData.ts`, `dlcData.ts`, `dlcVersionData.ts`, and `collectionData.ts`, all re-exported from `model.ts`.
-
-## Database
-
-PostgreSQL is running in Docker (`game-catalog-db` container, port 5432, database `gamedb`). The intent is to eventually migrate the hardcoded data into this database.
+- Game master data in `master_games`; platform-split versions in `releases`, grouped by `release_groups`; DLCs in `dlcs` + `dlc_releases` (+ `dlc_release_compatibility`); collections in `collections` (+ `collection_releases`, `collection_dlc_releases`).
+- Google Sheets is the import source for catalog data (`server/src/db/import-sheet.ts`); cover/IGDB enrichment via `server/src/services/` (`enrichment`, `steamgriddb`, `scrape-enrichment`).
 
 ## Linting & formatting
 
-ESLint + Prettier are configured for TypeScript and HTML files. Run `npm run lint` to check and `npm run lint:fix` to auto-fix. The `.editorconfig` enforces LF line endings to prevent CRLF issues.
-
-Husky + lint-staged run automatically on `git commit` — staged `*.{ts,html}` files are linted with ESLint and formatted with Prettier before the commit is allowed through. `npm run prepare` installs the hooks.
+ESLint (TS/HTML) + Stylelint (CSS) + Prettier. `npm run lint` checks, `npm run lint:fix` fixes. `.editorconfig` enforces LF. Husky + lint-staged run on `git commit` (staged `*.{ts,html}` → eslint + prettier; `*.css` → stylelint + prettier).
 
 ## Testing
 
-**Playwright** is used for unit and E2E tests.
-
-- `npm test` — runs all tests headlessly
-- `npx playwright test --ui` — interactive UI mode
-- `npx playwright test --headed` — run in visible browser
-- `npx playwright test --debug` — step-through debugger
-
-Test files:
-
-- `src/classes/game.spec.ts` — model unit tests (genreEnum, Game, Series)
-- `e2e/app.component.spec.ts` — AppComponent E2E tests (sections, series, collections, navigation)
-- `e2e/game-ui.component.spec.ts` — GameUIComponent E2E tests (rendering, selection, details panel)
-
-The Playwright config (`playwright.config.ts`) auto-starts `ng serve` on port 4200 before tests.
+- **Vitest** (`npm run test:unit`, happy-dom) — unit tests in `src/**/*.spec.ts`.
+- **Playwright** (`npm test` = UI mode, `npm run test:headless` = headless) — E2E in `e2e/*.spec.ts`; `playwright.config.ts` auto-starts `ng serve` on :4200. Also `npx playwright test --headed` / `--debug` for interactive runs.
+- Backend: `cd server && npm run test` (Vitest) — `server/src/**/*.test.ts`.
