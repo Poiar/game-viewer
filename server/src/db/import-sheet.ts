@@ -487,6 +487,41 @@ async function main() {
   const editionTypeNameToId = new Map(existingEditionTypes.map((e) => [e.name, e.id]));
   const mediaFormatNameToId = new Map(existingMediaFormats.map((m) => [m.name, m.id]));
 
+  // Ensure edition types exist (release_groups.edition_type_id is a NOT NULL FK,
+  // and the map lookup below falls back to id 1 = "Original").
+  const EDITION_TYPES = ["Original", "Remaster", "Remake", "Enhanced", "Downsample", "Demake"];
+  let editionTypesChanged = false;
+  for (const name of EDITION_TYPES) {
+    if (!editionTypeNameToId.has(name)) {
+      await db.insert(s.editionTypes).values({ name, slug: slug(name) });
+      editionTypesChanged = true;
+    }
+  }
+  if (editionTypesChanged) {
+    const refreshedEditionTypes = await db.select().from(s.editionTypes);
+    editionTypeNameToId.clear();
+    for (const e of refreshedEditionTypes) {
+      editionTypeNameToId.set(e.name, e.id);
+    }
+  }
+
+  // Ensure media formats exist (releases.media_format_id is a NOT NULL FK).
+  const MEDIA_FORMATS = ["N/A", "Digital", "DVD", "CD", "Blu-ray"];
+  let mediaFormatsChanged = false;
+  for (const name of MEDIA_FORMATS) {
+    if (!mediaFormatNameToId.has(name)) {
+      await db.insert(s.mediaFormats).values({ name, slug: slug(name) });
+      mediaFormatsChanged = true;
+    }
+  }
+  if (mediaFormatsChanged) {
+    const refreshedMediaFormats = await db.select().from(s.mediaFormats);
+    mediaFormatNameToId.clear();
+    for (const m of refreshedMediaFormats) {
+      mediaFormatNameToId.set(m.name, m.id);
+    }
+  }
+
   // Add any missing platforms
   const neededPlatforms = new Set<string>();
   for (const row of rows) {

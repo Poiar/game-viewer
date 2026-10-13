@@ -589,6 +589,7 @@ RAPIDAPI_KEY=
 | `express-rate-limit`       | ^7.5.0  |
 | `helmet`                   | ^8.0.0  |
 | `jsonwebtoken`             | ^9.0.2  |
+| `pg`                       | ^8.23.1 |
 | `uuid`                     | ^11.1.0 |
 | `zod`                      | ^3.24.2 |
 
@@ -632,6 +633,6 @@ The importer handles:
 
 ---
 
-_Auto-generated README built 2026-10-12._
+_Auto-generated README built 2026-10-13._
 
 _Run `npm run build-readme` to regenerate._
