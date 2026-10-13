@@ -8,6 +8,7 @@ function requireEnv(key: string): string {
 
 export const config = {
   port: parseInt(process.env.PORT ?? "3001", 10),
+  host: process.env.HOST ?? "127.0.0.1",
   databaseUrl: requireEnv("DATABASE_URL"),
   jwtSecret: requireEnv("JWT_SECRET"),
   jwtRefreshSecret: requireEnv("JWT_REFRESH_SECRET"),
