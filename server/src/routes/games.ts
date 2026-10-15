@@ -152,6 +152,7 @@ router.get("/", optionalAuth, async (req: Request, res: Response) => {
         seriesId: masterGames.seriesId,
         seriesName: series.name,
         alternativeTitles: masterGames.alternativeTitles,
+        criticScore: masterGames.criticScore,
         createdAt: masterGames.createdAt,
       })
       .from(masterGames)
@@ -265,6 +266,7 @@ router.get("/", optionalAuth, async (req: Request, res: Response) => {
       coverImageUrl: g.coverImageUrl,
       series: g.seriesId ? { id: g.seriesId, name: g.seriesName } : null,
       alternativeTitles: g.alternativeTitles,
+      criticScore: g.criticScore,
       genres: genreMap[g.id] || [],
       releaseGroupsCount: rgCountMap[g.id] || 0,
       ownedReleases: ownedMap[g.id] || [],
@@ -445,6 +447,11 @@ router.get("/:slug", optionalAuth, async (req: Request, res: Response) => {
       hltbTime: game.hltbTime ?? null,
       criticScore: game.criticScore ?? null,
       summary: game.summary ?? null,
+      developer: game.developer ?? null,
+      publisher: game.publisher ?? null,
+      currentLow: game.currentLow ?? null,
+      historicalLow: game.historicalLow ?? null,
+      priceCurrency: game.priceCurrency ?? null,
       screenshots: game.screenshots ?? [],
       releaseGroups: game.releaseGroups
         .sort((a, b) => (a.releaseYear ?? 0) - (b.releaseYear ?? 0))

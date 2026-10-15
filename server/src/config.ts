@@ -20,4 +20,6 @@ export const config = {
   igdbClientId: process.env.IGDB_CLIENT_ID ?? "",
   igdbAccessToken: process.env.IGDB_ACCESS_TOKEN ?? "",
   rapidApiKey: process.env.RAPIDAPI_KEY ?? "",
+  // Canonical GIDB store's static dir (covers served at /gicovers/*)
+  gidbStaticDir: process.env.GIDB_STATIC_DIR ?? "C:\\projects\\gidb\\static",
 } as const;

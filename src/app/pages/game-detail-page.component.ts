@@ -65,6 +65,29 @@ import { coverGradient } from "../shared/cover-placeholder";
               <span class="detail-desc-src">via IGDB</span>
             }
           }
+          @if (g.criticScore || g.developer || g.publisher) {
+            <div class="detail-meta-row">
+              @if (g.criticScore) {
+                <span class="meta-item meta-score" title="Critic score">★ {{ g.criticScore }}</span>
+              }
+              @if (g.developer) {
+                <span class="meta-item" title="Developer">Developer: {{ g.developer }}</span>
+              }
+              @if (g.publisher) {
+                <span class="meta-item" title="Publisher">Publisher: {{ g.publisher }}</span>
+              }
+            </div>
+          }
+          @if (g.currentLow != null && g.priceCurrency) {
+            <div class="detail-meta-row">
+              <span class="meta-item meta-price" title="Best current price (IsThereAnyDeal)">
+                💲 {{ g.priceCurrency }} {{ g.currentLow }}
+                @if (g.historicalLow != null) {
+                  <span class="meta-price-low">· low {{ g.historicalLow }}</span>
+                }
+              </span>
+            </div>
+          }
           <!-- IGDB + Steam metadata -->
           @if (
             g.gameModes?.length ||
@@ -583,6 +606,23 @@ import { coverGradient } from "../shared/cover-placeholder";
         color: #f76e6e;
         border-color: rgba(247, 110, 110, 0.25);
         font-weight: 700;
+      }
+      .meta-score {
+        background: rgba(255, 215, 0, 0.12);
+        color: #ffd700;
+        border-color: rgba(255, 215, 0, 0.25);
+        font-weight: 700;
+      }
+      .meta-price {
+        background: rgba(6, 214, 160, 0.12);
+        color: #06d6a0;
+        border-color: rgba(6, 214, 160, 0.25);
+        font-weight: 700;
+      }
+      .meta-price-low {
+        opacity: 0.7;
+        font-weight: 500;
+        margin-left: 4px;
       }
       .meta-trailer {
         background: rgba(79, 195, 247, 0.12);

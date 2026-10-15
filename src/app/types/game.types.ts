@@ -19,6 +19,11 @@ export interface MasterGame {
   ageRating?: string | null;
   trailerUrl?: string | null;
   franchise?: string | null;
+  developer?: string | null;
+  publisher?: string | null;
+  currentLow?: string | null;
+  historicalLow?: string | null;
+  priceCurrency?: string | null;
   steamAppId?: number | null;
   steamPlayers?: number | null;
   createdAt: string;

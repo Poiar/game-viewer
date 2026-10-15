@@ -29,6 +29,12 @@ app.use(cookieParser());
 app.use(express.json({ limit: "1mb" }));
 
 // ---------------------------------------------------------------------------
+// GIDB cover art — mounted BEFORE rate limiting so image loads aren't throttled
+// ---------------------------------------------------------------------------
+import gicoversRouter from "./routes/gicovers.js";
+app.use("/gicovers", gicoversRouter);
+
+// ---------------------------------------------------------------------------
 // Rate limiting
 // ---------------------------------------------------------------------------
 const limiter = rateLimit({
