@@ -213,6 +213,12 @@ All endpoints are prefixed with `/api`. Auth-required endpoints marked with 🔒
 | `POST`   | `/api/games/:id/cover`  | 🔒   |
 | `POST`   | `/api/games/bulk-cover` | 🔒   |
 
+### gicovers
+
+| Method | Path    | Auth |
+| ------ | ------- | ---- |
+| `GET`  | `/api*` |      |
+
 ### Your owned collection
 
 | Method   | Path                 | Auth |
@@ -532,6 +538,11 @@ All endpoints are prefixed with `/api`. Auth-required endpoints marked with 🔒
     "target": "http://localhost:3001",
     "secure": false,
     "logLevel": "debug"
+  },
+  "/gicovers": {
+    "target": "http://localhost:3001",
+    "secure": false,
+    "logLevel": "error"
   }
 }
 ```
@@ -633,6 +644,6 @@ The importer handles:
 
 ---
 
-_Auto-generated README built 2026-10-13._
+_Auto-generated README built 2026-10-15._
 
 _Run `npm run build-readme` to regenerate._
