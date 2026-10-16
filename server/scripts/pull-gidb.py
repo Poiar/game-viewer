@@ -178,14 +178,29 @@ def load_gidb():
         if eid in ed:
             ed[eid]["hltb_time"] = hours
 
-    # ITAD prices (current best + historical low)
+    # Best current + historical low across ALL price sources (itad / aks /
+    # ggdeals): the cheapest current offer and lowest all-time price win,
+    # keyshop or retail. ggdeals keyshop rows are ref=<appid> (no ':retail'),
+    # so their lower prices naturally beat retail rows here.
+    best = {}  # eid -> [currency, current_low, historical_low]
     for eid, currency, cur, hist in con.execute(
         "SELECT edition_id, currency, current_low, historical_low FROM game_price"
     ):
-        if eid in ed:
-            ed[eid]["price_currency"] = currency
-            ed[eid]["current_low"] = cur
-            ed[eid]["historical_low"] = hist
+        if eid not in ed:
+            continue
+        b = best.get(eid)
+        if b is None:
+            best[eid] = [currency, cur, hist]
+            continue
+        if cur is not None and (b[1] is None or cur < b[1]):
+            b[1] = cur
+            b[0] = currency
+        if hist is not None and (b[2] is None or hist < b[2]):
+            b[2] = hist
+    for eid, (currency, cur, hist) in best.items():
+        ed[eid]["price_currency"] = currency
+        ed[eid]["current_low"] = cur
+        ed[eid]["historical_low"] = hist
 
     # screenshots (IGDB CDN URLs; upgrade size token, keep first 5)
     for eid, url in con.execute(
