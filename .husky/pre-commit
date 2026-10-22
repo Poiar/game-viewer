@@ -1,1 +1,16 @@
+# Identity guard — GitHub repos on this host commit as `poiarnoia` only.
+# `admin` is the Gitea convention (localhost:3000), never valid here.
+# Rationale + rollout: hermes-config tickets/HC/HC-2.md, HC-5.md
+ident=$(git var GIT_AUTHOR_IDENT)
+case "$ident" in
+  "poiarnoia <poiarnoia@proton.me>"*) ;;
+  *)
+    printf '\nBLOCKED: commit author is not poiarnoia <poiarnoia@proton.me>\n' >&2
+    printf 'Got: %s\n\n' "$(printf '%s' "$ident" | sed 's/ [0-9].*//')" >&2
+    printf '  git -c user.name=poiarnoia -c user.email=poiarnoia@proton.me commit ...\n\n' >&2
+    printf 'See hermes-config tickets/HC/HC-5.md\n' >&2
+    exit 1
+    ;;
+esac
+
 npx lint-staged
