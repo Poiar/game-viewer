@@ -87,10 +87,13 @@ def load_gidb():
     for name, gid in con.execute("SELECT name, game_id FROM game_alias"):
         alias_to_gid.setdefault(name.lower(), gid)
 
-    # game_id -> primary edition_id (original kind, else lowest edition_id)
+    # game_id -> primary edition_id (the 'original' incarnation, else lowest
+    # edition_id). gidb split its old `kind` into incarnation / contents /
+    # packaging; the version axis that says "original" here is incarnation.
     by_gid = defaultdict(list)
-    for eid, gid, kind in con.execute("SELECT edition_id, game_id, kind FROM edition"):
-        by_gid[gid].append((eid, kind))
+    for eid, gid, incarnation in con.execute(
+            "SELECT edition_id, game_id, incarnation FROM edition"):
+        by_gid[gid].append((eid, incarnation))
     gid_to_eid = {}
     for gid, eds in by_gid.items():
         originals = [e for e in eds if e[1] == "original"]
